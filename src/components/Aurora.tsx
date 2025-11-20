@@ -54,27 +54,31 @@ export default function Aurora() {
   const blobsRef = useRef<BlobSpec[] | null>(null)
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d', { alpha: true })
+    const canvasEl = canvasRef.current
+    if (!canvasEl) return
+    const ctx = canvasEl.getContext('2d', { alpha: true })
     if (!ctx) return
 
     function resize() {
+      const c = canvasEl as HTMLCanvasElement
+      const context = ctx as CanvasRenderingContext2D
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = Math.floor(canvas.clientWidth * dpr)
-      canvas.height = Math.floor(canvas.clientHeight * dpr)
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      blobsRef.current = createBlobs(canvas.clientWidth, canvas.clientHeight)
+      c.width = Math.floor(c.clientWidth * dpr)
+      c.height = Math.floor(c.clientHeight * dpr)
+      context.setTransform(dpr, 0, 0, dpr, 0, 0)
+      blobsRef.current = createBlobs(c.clientWidth, c.clientHeight)
     }
     resize()
     window.addEventListener('resize', resize)
 
-    ctx.globalCompositeOperation = 'lighter'
+    ;(ctx as CanvasRenderingContext2D).globalCompositeOperation = 'lighter'
 
     function draw() {
+      const c = canvasEl as HTMLCanvasElement
+      const context = ctx as CanvasRenderingContext2D
       const blobs = blobsRef.current!
-      const { clientWidth: w, clientHeight: h } = canvas
-      ctx.clearRect(0, 0, w, h)
+      const { clientWidth: w, clientHeight: h } = c
+      context.clearRect(0, 0, w, h)
       for (const b of blobs) {
         // move
         b.x += b.vx
@@ -83,12 +87,12 @@ export default function Aurora() {
         if (b.x < -b.radius * 0.2 || b.x > w + b.radius * 0.2) b.vx *= -1
         if (b.y < -b.radius * 0.2 || b.y > h + b.radius * 0.2) b.vy *= -1
         // draw radial gradient
-        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius)
+        const g = context.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius)
         for (const [stop, color] of b.colorStops) g.addColorStop(stop, color)
-        ctx.fillStyle = g
-        ctx.beginPath()
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2)
-        ctx.fill()
+        context.fillStyle = g
+        context.beginPath()
+        context.arc(b.x, b.y, b.radius, 0, Math.PI * 2)
+        context.fill()
       }
       frameRef.current = requestAnimationFrame(draw)
     }

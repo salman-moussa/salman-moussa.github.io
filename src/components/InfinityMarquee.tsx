@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 export default function InfinityMarquee({ children, speed = 30 }: { children: ReactNode; speed?: number }) {
   return (

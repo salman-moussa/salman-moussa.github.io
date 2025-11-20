@@ -8,25 +8,27 @@ export default function Starfield({ density = 350 }: { density?: number }) {
   const frameRef = useRef<number | null>(null)
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const canvasEl = canvasRef.current
+    if (!canvasEl) return
+    const ctx = canvasEl.getContext('2d')
     if (!ctx) return
 
     function resize() {
+      const c = canvasEl as HTMLCanvasElement
+      const context = ctx as CanvasRenderingContext2D
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = Math.floor(canvas.clientWidth * dpr)
-      canvas.height = Math.floor(canvas.clientHeight * dpr)
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      c.width = Math.floor(c.clientWidth * dpr)
+      c.height = Math.floor(c.clientHeight * dpr)
+      context.setTransform(dpr, 0, 0, dpr, 0, 0)
       // regenerate stars
-      const count = Math.floor((canvas.clientWidth * canvas.clientHeight) / 8000)
+      const count = Math.floor((c.clientWidth * c.clientHeight) / 8000)
       const target = Math.max(density, count)
       const stars: Star[] = []
       for (let i = 0; i < target; i++) {
         stars.push({
-          x: (Math.random() - 0.5) * canvas.clientWidth,
-          y: (Math.random() - 0.5) * canvas.clientHeight,
-          z: Math.random() * canvas.clientWidth,
+          x: (Math.random() - 0.5) * c.clientWidth,
+          y: (Math.random() - 0.5) * c.clientHeight,
+          z: Math.random() * c.clientWidth,
           pz: 0,
         })
       }
@@ -36,10 +38,12 @@ export default function Starfield({ density = 350 }: { density?: number }) {
     window.addEventListener('resize', resize)
 
     function draw() {
-      const w = canvas.clientWidth
-      const h = canvas.clientHeight
-      ctx.clearRect(0, 0, w, h)
-      ctx.translate(w / 2, h / 2)
+      const c = canvasEl as HTMLCanvasElement
+      const context = ctx as CanvasRenderingContext2D
+      const w = c.clientWidth
+      const h = c.clientHeight
+      context.clearRect(0, 0, w, h)
+      context.translate(w / 2, h / 2)
       const speed = 2
       for (const s of starsRef.current) {
         s.z -= speed
@@ -52,21 +56,21 @@ export default function Starfield({ density = 350 }: { density?: number }) {
         const sx = (s.x / s.z) * w
         const sy = (s.y / s.z) * w
         const r = Math.max(0.7, 2 - s.z / (w * 0.5))
-        ctx.fillStyle = 'rgba(255,255,255,0.8)'
-        ctx.beginPath()
-        ctx.arc(sx, sy, r, 0, Math.PI * 2)
-        ctx.fill()
+        context.fillStyle = 'rgba(255,255,255,0.8)'
+        context.beginPath()
+        context.arc(sx, sy, r, 0, Math.PI * 2)
+        context.fill()
 
         const px = (s.x / s.pz) * w
         const py = (s.y / s.pz) * w
         s.pz = s.z
-        ctx.strokeStyle = 'rgba(124,58,237,0.25)'
-        ctx.beginPath()
-        ctx.moveTo(px, py)
-        ctx.lineTo(sx, sy)
-        ctx.stroke()
+        context.strokeStyle = 'rgba(124,58,237,0.25)'
+        context.beginPath()
+        context.moveTo(px, py)
+        context.lineTo(sx, sy)
+        context.stroke()
       }
-      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      context.setTransform(1, 0, 0, 1, 0, 0)
       frameRef.current = requestAnimationFrame(draw)
     }
     frameRef.current = requestAnimationFrame(draw)
