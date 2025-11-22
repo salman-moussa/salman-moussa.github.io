@@ -118,7 +118,7 @@ export default function App() {
                 </a>
               </Magnetic>
               <Magnetic>
-                <a href="#contact" className="inline-flex items-center rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-white hover:border-white/40 transition">
+                <a href="#contact" className="inline-flex items-center rounded-full bg-white text-neutral-950 px-5 py-2 text-sm font-semibold hover:opacity-90 transition">
                   Contact Me
                 </a>
               </Magnetic>
