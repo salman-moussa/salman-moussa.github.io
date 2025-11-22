@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-type Star = { x: number; y: number; z: number; pz: number }
+type Star = { x: number; y: number; vx: number; vy: number; size: number }
 
 export default function Starfield({ density = 350 }: { density?: number }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -25,11 +25,14 @@ export default function Starfield({ density = 350 }: { density?: number }) {
       const target = Math.max(density, count)
       const stars: Star[] = []
       for (let i = 0; i < target; i++) {
+        const angle = Math.random() * Math.PI * 2
+        const velocity = 0.2 + Math.random() * 0.5
         stars.push({
-          x: (Math.random() - 0.5) * c.clientWidth,
-          y: (Math.random() - 0.5) * c.clientHeight,
-          z: Math.random() * c.clientWidth,
-          pz: 0,
+          x: Math.random() * c.clientWidth,
+          y: Math.random() * c.clientHeight,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          size: Math.random() * 1.5 + 0.5,
         })
       }
       starsRef.current = stars
@@ -43,35 +46,24 @@ export default function Starfield({ density = 350 }: { density?: number }) {
       const w = c.clientWidth
       const h = c.clientHeight
       context.clearRect(0, 0, w, h)
-      context.translate(w / 2, h / 2)
-      const speed = 2
+     
       for (const s of starsRef.current) {
-        s.z -= speed
-        if (s.z < 1) {
-          s.x = (Math.random() - 0.5) * w
-          s.y = (Math.random() - 0.5) * h
-          s.z = w
-          s.pz = s.z
-        }
-        const sx = (s.x / s.z) * w
-        const sy = (s.y / s.z) * w
-        const r = Math.max(0.7, 2 - s.z / (w * 0.5))
+        s.x += s.vx
+        s.y += s.vy
+
+        // Wrap around screen
+        if (s.x < 0) s.x = w
+        if (s.x > w) s.x = 0
+        if (s.y < 0) s.y = h
+        if (s.y > h) s.y = 0
+        
         context.fillStyle = 'rgba(255,255,255,0.8)'
         context.beginPath()
-        context.arc(sx, sy, r, 0, Math.PI * 2)
+        context.arc(s.x, s.y, s.size, 0, Math.PI * 2)
         context.fill()
-
-        const px = (s.x / s.pz) * w
-        const py = (s.y / s.pz) * w
-        s.pz = s.z
-        context.strokeStyle = 'rgba(124,58,237,0.25)'
-        context.beginPath()
-        context.moveTo(px, py)
-        context.lineTo(sx, sy)
-        context.stroke()
       }
-      context.setTransform(1, 0, 0, 1, 0, 0)
-      frameRef.current = requestAnimationFrame(draw)
+    
+      
     }
     frameRef.current = requestAnimationFrame(draw)
 
